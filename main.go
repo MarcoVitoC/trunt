@@ -2,34 +2,75 @@ package main
 
 import "fmt"
 
-var cave = make([][]string, 10, 15)
+const ROWS, COLS int = 10, 15
+var cave = make([][]string, ROWS, COLS)
+var posX, posY int = 1, 1
+
+var wall string = "🧱"
+var dark string = "⬛"
+var revealed string = "  "
+var player string = "🙂"
+var treasure string = "💎" 
 
 func generateCave() {
-	for i:=0; i<10; i++ {
-		cave[i] = make([]string, 15)
-	}
-
-	for i:=0; i<10; i++ {
-		for j:=0; j<15; j++ {
-			if i == 0 || i == 10 - 1 || j == 0 || j == 15 - 1 {
-				cave[i][j] = "🧱"
+	for y:=0; y<ROWS; y++ {
+		cave[y] = make([]string, COLS)
+		for x:=0; x<COLS; x++ {
+			if y == 0 || y == ROWS - 1 || x == 0 || x == COLS - 1 {
+				cave[y][x] = wall
 			} else {
-				cave[i][j] = "⬛"
+				cave[y][x] = dark
 			}
 		}
 	}
 
-	cave[1][1] = "🙂"
-	cave[8][13] = "💎"
+	cave[posY][posX] = player
+	cave[ROWS - 2][COLS - 2] = treasure
+}
 
-	for i:=0; i<10; i++ {
-		for j:=0; j<15; j++ {
-			fmt.Print(cave[i][j])
+func displayCave() {
+	for y:=0; y<ROWS; y++ {
+		for x:=0; x<COLS; x++ {
+			fmt.Print(cave[y][x])
 		}
 		fmt.Println()
 	}
 }
 
 func main() {
+	var move string
 	generateCave()
+
+	for {
+		displayCave()
+		fmt.Print("Input move [w|a|s|d]: ")
+		fmt.Scan(&move); fmt.Scanln()
+
+		switch move {
+			case "w":
+				if cave[posY - 1][posX] != wall {
+					cave[posY][posX] = revealed
+					posY--
+					cave[posY][posX] = player
+				}
+			case "a":
+				if cave[posY][posX - 1] != wall {
+					cave[posY][posX] = revealed
+					posX--
+					cave[posY][posX] = player
+				}
+			case "s":
+				if cave[posY + 1][posX] != wall {
+					cave[posY][posX] = revealed
+					posY++
+					cave[posY][posX] = player
+				}
+			case "d":
+				if cave[posY][posX + 1] != wall {
+					cave[posY][posX] = revealed
+					posX++
+					cave[posY][posX] = player
+				}
+		}
+	}
 }
