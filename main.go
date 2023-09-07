@@ -14,11 +14,15 @@ const ROWS, COLS int = 10, 15
 var cave = make([][]Cell, ROWS)
 var posX, posY int = 1, 1
 
-var wall string = "🧱"
-var dark string = "⬛"
-var discovered string = "  "
-var player string = "🙂"
-var treasure string = "💎"
+const (
+	wall       string = "🧱"
+	dark       string = "⬛"
+	discovered string = "  "
+	player     string = "🙂"
+	died       string = "😵"
+	succeed    string = "😁"
+	treasure   string = "💎"
+)
 
 func generateCave() {
 	for y:=0; y<ROWS; y++ {
@@ -90,22 +94,27 @@ func main() {
 
 	for {
 		displayCave()
-		
 		fmt.Print("Input move [w|a|s|d]: ")
 		fmt.Scan(&move); fmt.Scanln()
 
 		if isNotWall(move) {
 			newY, newX := getNewPosition(move)
+
+			cave[posY][posX].symbol = discovered
+			posY, posX = newY, newX
+
 			if cave[newY][newX].status == "death" {
+				cave[posY][posX].symbol = died
+				displayCave()
 				fmt.Println("You just found the death cell 💀")
 				break
-			} else if cave[newY][newX].symbol == "💎" {
+			} else if cave[newY][newX].symbol == treasure {
+				cave[posY][posX].symbol = succeed
+				displayCave()
 				fmt.Println("Congratulations! You have won the game 👏")
 				break
 			}
 
-			cave[posY][posX].symbol = discovered
-			posY, posX = newY, newX
 			cave[posY][posX].symbol = player
 		}
 	}
