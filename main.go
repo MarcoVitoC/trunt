@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"os/exec"
-	"math/rand"
+
+	"golang.org/x/term"
 )
 
 type Cell struct {
@@ -68,6 +70,22 @@ func displayCave() {
 	}
 }
 
+func playerMove() string {
+	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	if err != nil {
+		panic(err)
+	}
+	defer term.Restore(int(os.Stdin.Fd()), oldState)
+
+	var move []byte = make([]byte, 1)
+	_, err = os.Stdin.Read(move)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(move)
+}
+
 func isNotWall(move string) bool {
 	switch move {
 		case "w":
@@ -98,30 +116,39 @@ func getNewPosition(move string) (int, int) {
 	}
 }
 
+func playerDied() {
+	cave[posY][posX].symbol = DIED
+	displayCave()
+	fmt.Println("You just found the death cell 💀")
+}
+
+func playerWon() {
+	cave[posY][posX].symbol = WON
+	displayCave()
+	fmt.Println("Congratulations! You have won the game 👏")
+}
+
 func main() {
-	var move string
 	generateCave()
 
 	for {
 		displayCave()
-		fmt.Print("Input move [w|a|s|d]: ")
-		fmt.Scan(&move); fmt.Scanln()
-
+		
+		move := playerMove()
 		if isNotWall(move) {
 			newY, newX := getNewPosition(move)
 
 			cave[posY][posX].symbol = DISCOVERED
 			posY, posX = newY, newX
 
-			if cave[newY][newX].status == "death" {
-				cave[posY][posX].symbol = DIED
-				displayCave()
-				fmt.Println("You just found the death cell 💀")
+			isDeathCell := cave[newY][newX].status == "death"
+			isTreasure := cave[newY][newX].symbol == TREASURE
+
+			if isDeathCell {
+				playerDied()
 				break
-			} else if cave[newY][newX].symbol == TREASURE {
-				cave[posY][posX].symbol = WON
-				displayCave()
-				fmt.Println("Congratulations! You have won the game 👏")
+			} else if isTreasure {
+				playerWon()
 				break
 			}
 
