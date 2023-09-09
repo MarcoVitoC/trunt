@@ -21,3 +21,33 @@ func PlayerMove() string {
 
 	return string(move)
 }
+
+func IsNotWall(move string) bool {
+	switch move {
+		case "w":
+			return cave[posY - 1][posX].symbol != WALL
+		case "a":
+			return cave[posY][posX - 1].symbol != WALL
+		case "s":
+			return cave[posY + 1][posX].symbol != WALL
+		case "d":
+			return cave[posY][posX + 1].symbol != WALL
+		default:
+			return false
+	}
+}
+
+func GetNewPosition(move string) (int, int) {
+	switch move {
+		case "w":
+			return posY - 1, posX
+		case "a":
+			return posY, posX - 1
+		case "s":
+			return posY + 1, posX
+		case "d":
+			return posY, posX + 1
+		default:
+			return posY, posX
+	}
+}

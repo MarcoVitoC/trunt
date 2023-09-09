@@ -3,11 +3,9 @@ package game
 import (
 	"fmt"
 	"time"
-
-	"github.com/MarcoVitoC/trunt/game"
 )
 
-func timer(done chan bool) {
+func Timer(done chan bool) {
 	for {
 		second := 6
 
@@ -24,9 +22,9 @@ func timer(done chan bool) {
 
 		if second == -1 {
 			second += 6
-			game.resetCells()
-			game.shuffleDeathCells()
-			game.displayCave()
+			ResetCells()
+			ShuffleDeathCells()
+			DisplayCave()
 		}
 	}
 }
