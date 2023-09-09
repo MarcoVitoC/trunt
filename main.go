@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"os"
 	"os/exec"
+	"time"
 
 	"golang.org/x/term"
 )
@@ -14,11 +15,9 @@ type Cell struct {
 	status string
 }
 
-const ROWS, COLS int = 10, 15
-var cave = make([][]Cell, ROWS)
-var posX, posY int = 1, 1
-
 const (
+	ROWS		  int    = 10
+	COLS		  int    = 20
 	WALL       string = "🧱"
 	DARK       string = "⬛"
 	DISCOVERED string = "  "
@@ -27,6 +26,9 @@ const (
 	WON        string = "😁"
 	TREASURE   string = "💎"
 )
+
+var cave = make([][]Cell, ROWS)
+var posX, posY int = 1, 1
 
 func clear() {
 	cmd := exec.Command("cmd", "/c", "cls")
@@ -45,8 +47,8 @@ func generateCave() {
 				cave[y][x].symbol = DARK
 				cave[y][x].status = "safe"
 				
-				if rand.Intn(10) == 0 {
-					cave[y][x].status = "death"
+				if rand.Intn(8) == 0 {
+					cave[y][x].status = "danger"
 				}
 			}
 		}
@@ -128,12 +130,64 @@ func playerWon() {
 	fmt.Println("Congratulations! You have won the game 👏")
 }
 
+func resetCells() {
+	for y:=1; y<ROWS-1; y++ {
+		for x:=1; x<COLS-1; x++ {
+			if cave[y][x].symbol == PLAYER || cave[y][x].symbol == TREASURE {
+				continue
+			}
+			cave[y][x].symbol = DARK
+		}
+	}
+}
+
+func shuffleDeathCells() {
+	for y:=1; y<ROWS-1; y++ {
+		for x:=1; x<COLS-1; x++ {
+			if cave[y][x].symbol == PLAYER || cave[y][x].symbol == TREASURE {
+				continue
+			}
+			if rand.Intn(8) == 0 {
+				cave[y][x].status = "danger"
+			}
+		}
+	}
+}
+
+func timer(done chan bool) {
+	for {
+		second := 6
+
+		for second >= 0 {
+			select {
+				case <-done:
+					return
+				default:
+					fmt.Printf("Death cells shuffled in %d\r", second)
+					time.Sleep(1 * time.Second)
+					second--
+			}
+		}
+
+		if second == -1 {
+			second += 6
+			resetCells()
+			shuffleDeathCells()
+			displayCave()
+		}
+	}
+}
+
 func main() {
+	done := make(chan bool)
+	go timer(done)
+	defer close(done)
+
 	generateCave()
 
 	for {
 		displayCave()
-		
+
 		move := playerMove()
 		if isNotWall(move) {
 			newY, newX := getNewPosition(move)
@@ -141,7 +195,7 @@ func main() {
 			cave[posY][posX].symbol = DISCOVERED
 			posY, posX = newY, newX
 
-			isDeathCell := cave[newY][newX].status == "death"
+			isDeathCell := cave[newY][newX].status == "danger"
 			isTreasure := cave[newY][newX].symbol == TREASURE
 
 			if isDeathCell {
