@@ -178,7 +178,7 @@ func timer(done chan bool) {
 	}
 }
 
-func main() {
+func startGame() {
 	done := make(chan bool)
 	go timer(done)
 	defer close(done)
@@ -209,4 +209,8 @@ func main() {
 			cave[posY][posX].symbol = PLAYER
 		}
 	}
+}
+
+func main() {
+	startGame()
 }
