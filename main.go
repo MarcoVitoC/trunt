@@ -16,8 +16,8 @@ type Cell struct {
 }
 
 const (
-	ROWS		  int    = 10
-	COLS		  int    = 20
+	ROWS       int    = 10
+	COLS       int    = 20
 	WALL       string = "🧱"
 	DARK       string = "⬛"
 	DISCOVERED string = "  "
