@@ -7,7 +7,7 @@ import (
 
 func Timer(done chan bool) {
 	for {
-		second := 6
+		second := 5
 
 		for second >= 0 {
 			select {
@@ -21,7 +21,7 @@ func Timer(done chan bool) {
 		}
 
 		if second == -1 {
-			second += 6
+			second += 5
 			ResetCells()
 			ShuffleDeathCells()
 			DisplayCave()
