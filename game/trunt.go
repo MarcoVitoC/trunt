@@ -3,8 +3,7 @@ package game
 func StartGame() {
 	done := make(chan bool)
 	go Timer(done)
-	defer close(done)
-
+	
 	GenerateCave()
 
 	for {
@@ -31,4 +30,7 @@ func StartGame() {
 			cave[posY][posX].symbol = PLAYER
 		}
 	}
+
+	close(done)
+	PlayAgain()
 }
